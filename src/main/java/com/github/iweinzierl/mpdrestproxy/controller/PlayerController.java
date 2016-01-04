@@ -2,15 +2,18 @@ package com.github.iweinzierl.mpdrestproxy.controller;
 
 import com.github.iweinzierl.mpdrestproxy.domain.PlayerInfo;
 import com.github.iweinzierl.mpdrestproxy.domain.PlayerStatus;
+import com.github.iweinzierl.mpdrestproxy.helper.Converter;
 import com.github.iweinzierl.mpdrestproxy.helper.MPDBean;
 import org.bff.javampd.MPDException;
 import org.bff.javampd.player.Player;
+import org.bff.javampd.playlist.Playlist;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -21,9 +24,16 @@ public class PlayerController {
 
     @RequestMapping(path = "/api/player", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<PlayerInfo> getPlayerInfo() {
-        Player.Status status = mpdBean.getMpd().getPlayer().getStatus();
+        Playlist playlist = mpdBean.getMpd().getPlaylist();
+        Player player = mpdBean.getMpd().getPlayer();
+        Player.Status status = player.getStatus();
 
         PlayerInfo playerInfo = new PlayerInfo();
+        playerInfo.setVolume(player.getVolume());
+        playerInfo.setCurrentSong(Converter.convertSong(player.getCurrentSong()));
+        playerInfo.setTotalTime(player.getTotalTime());
+        playerInfo.setElapsedTime(player.getElapsedTime());
+        playerInfo.setPlaylist(Converter.convertSongs(playlist.getSongList()));
 
         switch (status) {
             case STATUS_STOPPED:
@@ -115,6 +125,18 @@ public class PlayerController {
             }
         } catch (MPDException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @RequestMapping(path = "/api/player/volume", method = RequestMethod.GET)
+    public ResponseEntity setVolume(@RequestParam("volume") int volume) {
+        Player player = mpdBean.getMpd().getPlayer();
+
+        try {
+            player.setVolume(volume);
+            return ResponseEntity.ok().build();
+        } catch (MPDException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
     }
 }

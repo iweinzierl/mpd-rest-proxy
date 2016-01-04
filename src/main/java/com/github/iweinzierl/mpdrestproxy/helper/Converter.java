@@ -25,27 +25,27 @@ public final class Converter {
     }
 
     public static List<Song> convertSongs(Collection<MPDSong> songs) {
-        return songs.parallelStream().map(
-                song -> {
-                    Artist artist = new Artist(song.getArtistName());
+        return songs.parallelStream().map(Converter::convertSong).collect(Collectors.toList());
+    }
 
-                    Song transformedSong = new Song();
-                    transformedSong.setTitle(song.getTitle());
-                    transformedSong.setFile(song.getFile());
-                    transformedSong.setArtist(artist);
-                    transformedSong.setAlbum(new Album(artist, song.getAlbumName()));
-                    transformedSong.setGenre(song.getGenre());
-                    transformedSong.setComment(song.getComment());
-                    transformedSong.setYear(song.getYear());
-                    transformedSong.setDiscNumber(song.getDiscNumber());
-                    transformedSong.setLength(song.getLength());
-                    transformedSong.setTrack(song.getTrack());
-                    transformedSong.setPosition(song.getPosition());
-                    transformedSong.setId(song.getId());
+    public static Song convertSong(MPDSong song) {
+        Artist artist = new Artist(song.getArtistName());
 
-                    return transformedSong;
-                }
-        ).collect(Collectors.toList());
+        Song transformedSong = new Song();
+        transformedSong.setTitle(song.getTitle());
+        transformedSong.setFile(song.getFile());
+        transformedSong.setArtist(artist);
+        transformedSong.setAlbum(new Album(artist, song.getAlbumName()));
+        transformedSong.setGenre(song.getGenre());
+        transformedSong.setComment(song.getComment());
+        transformedSong.setYear(song.getYear());
+        transformedSong.setDiscNumber(song.getDiscNumber());
+        transformedSong.setLength(song.getLength());
+        transformedSong.setTrack(song.getTrack());
+        transformedSong.setPosition(song.getPosition());
+        transformedSong.setId(song.getId());
+
+        return transformedSong;
     }
 
     public static List<MPDSong> convertToMpdSongs(Collection<Song> songs) {
