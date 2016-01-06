@@ -29,6 +29,10 @@ public final class Converter {
     }
 
     public static Song convertSong(MPDSong song) {
+        if (song == null) {
+            return null;
+        }
+
         Artist artist = new Artist(song.getArtistName());
 
         Song transformedSong = new Song();
